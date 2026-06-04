@@ -1,0 +1,120 @@
+{
+  "description": "Configuration for automatic folder zipping workflow",
+  "folders": [
+    {
+      "source": "starter/amr/data-operations/python",
+      "output": "downloads/python",
+      "name": "amr-data-operations-python.zip"
+    },
+    {
+      "source": "starter/amr/pub-sub/python",
+      "output": "downloads/python",
+      "name": "amr-pub-sub-python.zip"
+    },
+    {
+      "source": "starter/amr/vector-query/python",
+      "output": "downloads/python",
+      "name": "amr-vector-query-python.zip"
+    },
+    {
+      "source": "starter/aks/deploy-aks/python",
+      "output": "downloads/python",
+      "name": "aks-deploy-python.zip"
+    },
+    {
+      "source": "starter/aks/configure-aks/python",
+      "output": "downloads/python",
+      "name": "aks-configure-python.zip"
+    },
+    {
+      "source": "starter/aks/troubleshoot-aks/python",
+      "output": "downloads/python",
+      "name": "aks-troubleshoot-python.zip"
+    },
+    {
+      "source": "starter/container-hosting/acr/python",
+      "output": "downloads/python",
+      "name": "acr-tasks-python.zip"
+    },
+    {
+      "source": "starter/container-hosting/app-service/python",
+      "output": "downloads/python",
+      "name": "app-svc-container-python.zip"
+    },
+    {
+      "source": "starter/aca/aca-deploy/python",
+      "output": "downloads/python",
+      "name": "aca-deploy-python.zip"
+    },
+    {
+      "source": "starter/aca/aca-manage/python",
+      "output": "downloads/python",
+      "name": "aca-manage-python.zip"
+    },
+    {
+      "source": "starter/aca/aca-scale/python",
+      "output": "downloads/python",
+      "name": "aca-scale-python.zip"
+    },
+    {
+      "source": "starter/postgresql/build-agent/python",
+      "output": "downloads/python",
+      "name": "postgresql-build-agent-python.zip"
+    },
+    {
+      "source": "starter/postgresql/optimize-vector-search/python",
+      "output": "downloads/python",
+      "name": "postgresql-optimize-vector-search-python.zip"
+    },
+    {
+      "source": "starter/postgresql/vector-search/python",
+      "output": "downloads/python",
+      "name": "postgresql-vector-search-python.zip"
+    },
+    {
+      "source": "starter/cosmosdb/build-query/python",
+      "output": "downloads/python",
+      "name": "cosmosdb-build-query-python.zip"
+    },
+    {
+      "source": "starter/cosmosdb/implement-vector/python",
+      "output": "downloads/python",
+      "name": "cosmosdb-implement-vector-python.zip"
+    },
+    {
+      "source": "starter/cosmosdb/optimize-query/python",
+      "output": "downloads/python",
+      "name": "cosmosdb-optimize-query-python.zip"
+    },
+    {
+      "source": "starter/integrate-services/service-bus/python",
+      "output": "downloads/python",
+      "name": "service-bus-python.zip"
+    },
+    {
+      "source": "starter/integrate-services/event-grid/python",
+      "output": "downloads/python",
+      "name": "event-grid-python.zip"
+    },
+    {
+      "source": "starter/app-sec-config/key-vault/python",
+      "output": "downloads/python",
+      "name": "key-vault-python.zip"
+    },
+    {
+      "source": "starter/app-sec-config/app-config/python",
+      "output": "downloads/python",
+      "name": "app-config-python.zip"
+    },
+    {
+      "source": "starter/instrument-observe/instrument-app/python",
+      "output": "downloads/python",
+      "name": "instrument-app-python.zip"
+    },
+    {
+      "source": "starter/instrument-observe/analyze-logs/python",
+      "output": "downloads/python",
+      "name": "analyze-logs-python.zip"
+    }
+  ]
+}
