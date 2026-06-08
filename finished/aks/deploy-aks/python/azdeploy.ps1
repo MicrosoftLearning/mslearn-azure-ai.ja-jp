@@ -243,6 +243,7 @@ function Create-AKSCluster {
             --resource-group $rg `
             --name $aksCluster `
             --node-count 1 `
+            --node-vm-size Standard_D2s_v3 `
             --vm-set-type VirtualMachineScaleSets `
             --load-balancer-sku standard `
             --enable-managed-identity `

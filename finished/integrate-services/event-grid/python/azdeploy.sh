@@ -152,7 +152,7 @@ create_event_subscriptions() {
         echo "✓ Subscription already exists: $sub_approved"
     fi
 
-    # Subscription for all events (no filter — audit log)
+    # Subscription for all events (no filter - audit log)
     sub_exists=$(az eventgrid namespace topic event-subscription show --resource-group $rg --namespace-name $namespace_name --topic-name $topic_name --name $sub_all 2>/dev/null)
     if [ -z "$sub_exists" ]; then
         az eventgrid namespace topic event-subscription create \
@@ -164,7 +164,7 @@ create_event_subscriptions() {
             --event-delivery-schema CloudEventSchemaV1_0 > /dev/null 2>&1
 
         if [ $? -eq 0 ]; then
-            echo "✓ Subscription created: $sub_all (all events — audit log)"
+            echo "✓ Subscription created: $sub_all (all events - audit log)"
         else
             echo "Error: Failed to create subscription '$sub_all'"
             return 1

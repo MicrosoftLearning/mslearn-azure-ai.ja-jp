@@ -95,7 +95,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "numpy", specifier = ">=1.24.0" },
+    { name = "numpy", specifier = ">=2.0.0" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "redis", specifier = ">=7.0.1" },
 ]
