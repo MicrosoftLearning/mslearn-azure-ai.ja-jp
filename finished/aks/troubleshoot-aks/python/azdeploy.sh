@@ -130,6 +130,7 @@ create_aks_cluster() {
             --resource-group $rg \
             --name $aks_cluster \
             --node-count 1 \
+            --node-vm-size Standard_D2s_v3 \
             --vm-set-type VirtualMachineScaleSets \
             --load-balancer-sku standard \
             --enable-managed-identity \

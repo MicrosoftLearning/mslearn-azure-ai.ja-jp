@@ -122,6 +122,8 @@ jobs:
             echo "Processing: $abs_source_path -> $abs_zip_file"
 
             if [ -d "$abs_source_path" ]; then
+              # Remove any existing zip so deleted/moved files aren't carried over
+              rm -f "$abs_zip_file"
               # Create zip file using absolute paths
               cd "$abs_source_path"
               zip -r "$abs_zip_file" .
