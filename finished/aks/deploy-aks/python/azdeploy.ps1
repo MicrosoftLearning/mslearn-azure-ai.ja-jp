@@ -322,7 +322,11 @@ function Deploy-ToAKS {
         --role "Cognitive Services OpenAI User" `
         --scope $foundryResourceId 2>$null | Out-Null
 
-    Write-Host "$([char]0x2713) Role assigned to AKS kubelet identity"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to assign Cognitive Services OpenAI User role. Re-run option 7 to try again."
+        return $false
+    }
+    Write-Host "$([char]0x2713) Role assigned to AKS kubelet identity (may take 1-2 minutes to propagate)"
     Write-Host ""
 
     # Update the deployment.yaml with the correct ACR endpoint and Foundry endpoint
