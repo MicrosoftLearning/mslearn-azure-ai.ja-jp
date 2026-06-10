@@ -38,7 +38,7 @@ lab:
 
 このセクションでは、プロジェクト スターター ファイルをダウンロードし、スクリプトを使用して必要なサービスを Azure サブスクリプションにデプロイします。 Cosmos DB アカウントのデプロイが完了するまで数分かかる場合があります。
 
-1. Web ブラウザーを開き、次の URL を入力して zip フォルダーをダウンロードします。 ファイルはユーザーの既定のダウンロード場所に保存されます。
+1. ブラウザーを開き、次の URL を入力してスターター ファイルをダウンロードします。 ファイルはユーザーの既定のダウンロード場所に保存されます。
 
     ```
     https://github.com/MicrosoftLearning/mslearn-azure-ai/raw/main/downloads/python/cosmosdb-implement-vector-python.zip
@@ -97,7 +97,7 @@ lab:
 
 このセクションでは、ベクトル類似検索を実行する関数を追加して、*vector_functions.py* ファイルを完成させます。 これらの関数は、**VectorDistance** 関数を使って、クエリ ベクトルとチケット埋め込みの類似度を計算します。 サポート アプリケーションでは、新しい問題が報告されたときに、これらの関数を使って似たチケットを検索できます。
 
-1. VS Codeで *client/vector_functions.py* ファイルを開きます。
+1. VS Code で *client/vector_functions.py* ファイルを開きます。
 
 1. **BEGIN STORE VECTOR DOCUMENT FUNCTION** というコメントを検索し、次に示すコードをこのコメントの直後に追加します。 この関数は、類似検索のためのベクトル埋め込みを含むサポート チケットを格納します。
 
@@ -262,7 +262,7 @@ lab:
 
 このセクションでは、ベクトル埋め込みとインデックス作成ポリシーを使って Cosmos DB コンテナーを作成するために使われる *setup_container.py* スクリプトをレビューします。 これらのポリシーを使用するコンテナーはデプロイ スクリプトによって既に作成されていますが、コードをレビューすると構成を理解するのに役立ちます。
 
-1. VS Codeで *client/setup_container.py* ファイルを開きます。
+1. VS Code で *client/setup_container.py* ファイルを開きます。
 
 1. **BEGIN CREATE VECTOR CONTAINER FUNCTION** というコメントを検索して、コードを確認します。 次の 2 つの重要なポリシー構成に注目してください。
 
@@ -316,7 +316,7 @@ lab:
 
 次に、Azure リソースのデプロイを完了します。
 
-## Azureリソースのデプロイを完了する
+## Azure リソースのデプロイを完了する
 
 このセクションでは、デプロイ スクリプトに戻ってコンテナーを作成し、Entra ID のアクセスを構成して、接続情報を取得します。
 
@@ -484,6 +484,6 @@ lab:
 - **echo $COSMOS_ENDPOINT** (Bash) または **$env:COSMOS_ENDPOINT** (PowerShell) を実行して、変数が設定されていることを確認します
 
 **Python venv のアクティブ化に関する問題**
-- Linux/macOSでは **source .venv/bin/activate** を使用します
+- Linux/macOS では **source .venv/bin/activate** を使用します
 - Windows PowerShell では **.\.venv\Scripts\Activate.ps1** を使用します
 - **activate** スクリプトがない場合は、**python3-venv** パッケージを再インストールして venv を再作成します
