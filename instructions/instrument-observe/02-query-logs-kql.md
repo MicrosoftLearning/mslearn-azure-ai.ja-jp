@@ -64,10 +64,11 @@ Kusto 照会言語 (KQL) は、Application Insights のログ データを分析
     az login
     ```
 
-1. 次のコマンドを実行して、演習に必要なリソース プロバイダーが自分のサブスクリプションにあることを確認します。
+1. 次のコマンドを実行して、演習に必要なリソース プロバイダーがご自分のサブスクリプションにあることを確認します。
 
     ```
     az provider register --namespace Microsoft.Insights
+    az provider register --namespace Microsoft.OperationalInsights
     ```
 
 1. 次のコマンドを実行して、Application Insights CLI 拡張機能を追加します。 この拡張機能は、デプロイ スクリプトで Application Insights リソースを作成して管理するために使用するコマンドを提供します。
@@ -112,7 +113,7 @@ Kusto 照会言語 (KQL) は、Application Insights のログ データを分析
     . .\.env.ps1
     ```
 
-    >**注:** ターミナルは開いたままにします。 ターミナルを閉じて新しいターミナルを作成する場合は、このコマンドをもう一度実行して、環境変数を再度読み込む必要があります。
+    >**注:** ターミナルは、開いたままにします。 ターミナルを閉じて新しいターミナルを作成する場合は、このコマンドをもう一度実行して、環境変数を再度読み込む必要があります。
 
 ## テレメトリ データを生成する
 
@@ -130,7 +131,7 @@ Kusto 照会言語 (KQL) は、Application Insights のログ データを分析
     python -m venv .venv
     ```
 
-1. 次のコマンドを実行して、Python 環境をアクティブにします。 **注:** Linux/macOS では Bash コマンドを使用します。 Windows では、PowerShell コマンドを使用します。 Windows で Git Bash を使っている場合は、**source .venv/Scripts/activate** を使用します。
+1. 次のコマンドを使用して、Python 環境をアクティブ化します。 **注:** Linux/macOS では、Bash コマンドを使用してください。 Windows では、PowerShell コマンドを使用します。 Windows で Git Bash を使っている場合は、**source .venv/Scripts/activate** を使用します。
 
     **Bash**
     ```bash
@@ -334,7 +335,7 @@ Kusto 照会言語 (KQL) は、Application Insights のログ データを分析
 
 これで演習が完了したので、不要なリソース使用を避けるために、作成したクラウド リソースを削除してください。
 
-1. VS Code ターミナルで次のコマンドを実行し、リソース グループとグループ内のすべてのリソースを削除します。 **\<rg-name>** を、演習で先ほど選択した名前に置き換えます。 このコマンドにより、Azure でバックグラウンド タスクが起動され、リソース グループが削除されます。
+1. VS Code ターミナルで次のコマンドを実行し、リソース グループと、そのグループ内のすべてのリソースを削除します。 **\<rg-name>** は、この演習で選択した名前に置き換えてください。 このコマンドを実行すると Azure の中でバックグラウンド タスクが起動されてリソース グループが削除されます。
 
     ```
     az group delete --name <rg-name> --no-wait --yes
@@ -358,7 +359,7 @@ Kusto 照会言語 (KQL) は、Application Insights のログ データを分析
 **環境変数を検証する**
 - *.env* ファイルがプロジェクトのルートに存在し、**APPLICATIONINSIGHTS_CONNECTION_STRING**、**RESOURCE_GROUP**、**APPINSIGHTS_NAME**、**APPINSIGHTS_RESOURCE_ID**、**ALERT_EMAIL** の値が含まれていることを確認します。
 - **source .env** (Bash) または **. .\.env.ps1** (PowerShell) を実行して環境変数をターミナル セッションに読み込んだことを確認します。
-- 変数が空の場合は、**source .env** (Bash) または **. .\.env.ps1** (PowerShell) を再実行します。
+- 変数が空の場合は、**source .env** (Bash) または **. .\.env.ps1** (PowerShell) をもう一度実行します。
 
 **認証を確認する**
 - **az account show** を実行して、Azure CLI にログインしていることを確認します。

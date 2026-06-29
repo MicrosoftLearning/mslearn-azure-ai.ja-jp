@@ -30,7 +30,7 @@ lab:
 
 演習を最後まで行うには、次のものが必要です。
 
-- 必要な Azure サービスをデプロイする権限を含む Azure サブスクリプション。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
+- 必要な Azure サービスをデプロイする権限を持つ Azure サブスクリプション。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
 - [サポートされているプラットフォーム](https://code.visualstudio.com/docs/supporting/requirements#_platforms)のいずれかにインストールされた [Visual Studio Code](https://code.visualstudio.com/)。
 - 最新バージョンの [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)。
 - オプション: [Python 3.12](https://www.python.org/downloads/) 以上。
@@ -49,7 +49,7 @@ lab:
 
 1. Visual Studio Code (VS Code) を起動し、メニューで **[ファイル] > [フォルダーを開く...]** を選択してから、プロジェクト ファイルを含むフォルダーを選びます。
 
-1. プロジェクトには Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方のデプロイ スクリプトが含まれています。 お使いの環境に適したファイルを開き、スクリプトの先頭の 2 つの値をご自分のニーズに合わせて変更してから、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
+1. プロジェクトには Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方のデプロイ スクリプトが含まれています。 自分の環境に適したファイルを開き、スクリプトの先頭の 2 つの値を自分のニーズに合わせて変更してから、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
 
     ```
     "<your-resource-group-name>" # Resource Group name
@@ -75,6 +75,7 @@ lab:
     ```azurecli
     az provider register --namespace Microsoft.App
     az provider register --namespace Microsoft.OperationalInsights
+    az provider register --namespace Microsoft.ContainerRegistry
     ```
 
 ### Azure でリソースを作成する
@@ -115,7 +116,7 @@ lab:
     . .\.env.ps1
     ```
 
-    >**注:** ターミナルは、開いたままにします。 閉じてから新しいターミナルを作成する場合、環境変数を再び作成するコマンドを実行する必要があることがあります。
+    >**注:** ターミナルは開いたままにします。 閉じてから新しいターミナルを作成する場合、環境変数を再び作成するコマンドを実行する必要があることがあります。
 
 1. 次のコマンドを実行してアプリの FQDN を取得し、結果を変数に保存します。
 

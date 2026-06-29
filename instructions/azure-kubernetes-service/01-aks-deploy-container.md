@@ -29,7 +29,7 @@ lab:
 
 演習を最後まで行うには、次のものが必要です。
 
-- 必要な Azure サービスをデプロイするためのアクセス許可がある Azure サブスクリプション。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
+- 必要な Azure サービスをデプロイする権限を持つ Azure サブスクリプション。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
 - [サポートされているプラットフォーム](https://code.visualstudio.com/docs/supporting/requirements#_platforms)のいずれかにインストールされた [Visual Studio Code](https://code.visualstudio.com/)。
 - 最新バージョンの [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)。
 - Kubernetes コマンドライン ツール [kubectl](https://kubernetes.io/docs/tasks/tools/)。
@@ -66,12 +66,15 @@ lab:
     az login
     ```
 
-1. 次のコマンドを実行して、AKS、ACR、Foundry AI モデルをインストールするために必要なリソース プロバイダーがサブスクリプションにあることを確かめます。
+1. 次のコマンドを実行して、AKS、ACR、Foundry AI モデルをインストールするために必要なリソース プロバイダーがサブスクリプションにあることを確かめます。 **Microsoft.Compute**、**Microsoft.Network**、**Microsoft.Storage** プロバイダーは、Azure が通常自動的に登録する AKS の依存関係ですが、明示的に登録することで、新しいサブスクリプションでクラスターの作成エラーが発生する場合に回避できます。
 
     ```
     az provider register --namespace Microsoft.CognitiveServices
     az provider register --namespace Microsoft.ContainerService
     az provider register --namespace Microsoft.ContainerRegistry
+    az provider register --namespace Microsoft.Compute
+    az provider register --namespace Microsoft.Network
+    az provider register --namespace Microsoft.Storage
     ```
 
 1. プロジェクトのルート ディレクトリにいることを確認し、ターミナルで適切なコマンドを実行してデプロイ スクリプトを起動します。
@@ -231,7 +234,7 @@ lab:
     python -m venv .venv
     ```
 
-1. 次のコマンドを実行して、Python 環境をアクティブにします。 **注:** Linux/macOS では、Bash コマンドを使用してください。 Windows では、PowerShell コマンドを使用します。 Windows で Git Bash を使っている場合は、**source .venv/Scripts/activate** を使用します。
+1. 次のコマンドを使用して、Python 環境をアクティブ化します。 **注:** Linux/macOS では、Bash コマンドを使用してください。 Windows では、PowerShell コマンドを使用します。 Windows で Git Bash を使っている場合は、**source .venv/Scripts/activate** を使用します。
 
     **Bash**
     ```bash
@@ -273,7 +276,7 @@ lab:
 
 これで演習が完了したので、不要なリソース使用を避けるために、作成したクラウド リソースを削除してください。
 
-1. VS Code ターミナルで次のコマンドを実行し、リソース グループとグループ内のすべてのリソースを削除します。 **\<rg-name>** は、演習で前に選択した名前に置き換えます。 このコマンドにより、Azure でバックグラウンド タスクが起動され、リソース グループが削除されます。
+1. VS Code ターミナルで次のコマンドを実行し、リソース グループと、そのグループ内のすべてのリソースを削除します。 **\<rg-name>** は、この演習で選択した名前に置き換えてください。 このコマンドを実行すると Azure の中でバックグラウンド タスクが起動されてリソース グループが削除されます。
 
     ```
     az group delete --name <rg-name> --no-wait --yes
