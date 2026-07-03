@@ -29,14 +29,14 @@ lab:
 
 演習を最後まで行うには、次のものが必要です。
 
-- 必要な Azure サービスをデプロイするためのアクセス許可がある Azure サブスクリプション。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
+- 必要な Azure サービスをデプロイする権限を持つ Azure サブスクリプション。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
 - [サポートされているプラットフォーム](https://code.visualstudio.com/docs/supporting/requirements#_platforms)のいずれかにインストールされた [Visual Studio Code](https://code.visualstudio.com/)。
 - 最新バージョンの [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)。
 - [Python 3.12](https://www.python.org/downloads/) 以上。
 
 ## プロジェクト スターター ファイルをダウンロードして Azure サービスをデプロイする
 
-このセクションでは、プロジェクト スターター ファイルをダウンロードし、スクリプトを使用してこの演習に必要なサービスをご自分の Azure サブスクリプションにデプロイします。 Cosmos DB アカウントのデプロイが完了するまで数分かかる場合があります。
+このセクションでは、プロジェクト スターター ファイルをダウンロードし、スクリプトを使用して必要なサービスを Azure サブスクリプションにデプロイします。 Cosmos DB アカウントのデプロイが完了するまで数分かかる場合があります。
 
 1. ブラウザーを開き、次の URL を入力してスターター ファイルをダウンロードします。 ファイルはユーザーの既定のダウンロード場所に保存されます。
 
@@ -83,6 +83,12 @@ lab:
     **PowerShell**
     ```powershell
     ./azdeploy.ps1
+    ```
+
+    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
+
+    ```powershell
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     ```
 
 1. スクリプト メニューが表示されたら、「**1**」と入力して **[Create Cosmos DB account]** オプションを開始します。 これにより、**EnableNoSQLVectorSearch** 機能とデータベースを含む Cosmos DB for NoSQL アカウントが作成されます。 **注:** デプロイが完了するまで 5 分から 10 分ほどかかります。

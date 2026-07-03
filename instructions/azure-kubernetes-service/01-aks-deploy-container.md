@@ -89,6 +89,12 @@ lab:
     ./azdeploy.ps1
     ```
 
+    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
+
+    ```powershell
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    ```
+
 ### Azure にリソースをデプロイする
 
 デプロイ スクリプトを実行した状態で、次の手順に従って Azure に必要なリソースを作成します。
@@ -207,6 +213,12 @@ lab:
     **PowerShell**
     ```powershell
     ./azdeploy.ps1
+    ```
+
+    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
+
+    ```powershell
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     ```
 
 1. 「**7**」と入力し、**[7. Deploy to AKS]** オプションを起動します。 このオプションではいくつかの操作を実行します。AKS 資格情報を取得して kubectl を構成し、**Cognitive Services OpenAI ユーザー** ロールを AKS kubelet マネージド ID に割り当てて API で Microsoft Entra ID を使用して Foundry に対して認証できるようにします。また、ACR エンドポイントと Foundry エンドポイントを使用してデプロイ マニフェストを更新し、**kubectl apply** を使って両方のマニフェストを AKS クラスターにデプロイします。 操作が完了したら、「**8**」と入力してデプロイ スクリプトを終了します。

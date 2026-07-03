@@ -94,6 +94,12 @@ lab:
     ./azdeploy.ps1
     ```
 
+    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
+
+    ```powershell
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    ```
+
 1. スクリプトの実行中に、「**1**」と入力して **Create Azure Container Registry and build container image** オプションを起動します。 このオプションは ACR サービスを作成し、ACR タスクを使ってイメージを構築し、レジストリにプッシュします。
 
 1. 前の操作が終わったら、「**2**」と入力して **Create Container Apps environment** オプションを起動します。 コンテナーをデプロイする前に環境を作成する必要があります。

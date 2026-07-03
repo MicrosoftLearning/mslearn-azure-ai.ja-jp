@@ -89,6 +89,12 @@ Kusto 照会言語 (KQL) は、Application Insights のログ データを分析
     ./azdeploy.ps1
     ```
 
+    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
+
+    ```powershell
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    ```
+
 1. スクリプトの実行中、「**1**」と入力して、**[1. Application Insights を作成する]** オプションを起動します。
 
     このオプションは、リソース グループがまだ存在していない場合にそれを作成し、Application Insights リソースを作成します。

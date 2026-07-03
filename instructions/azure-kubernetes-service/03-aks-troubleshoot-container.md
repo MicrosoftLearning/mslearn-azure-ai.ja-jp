@@ -86,6 +86,12 @@ lab:
     ./azdeploy.ps1
     ```
 
+    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
+
+    ```powershell
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    ```
+
 ### Azure にリソースをデプロイする
 
 デプロイ スクリプトを実行した状態で、次の手順に従って Azure に必要なリソースを作成します。

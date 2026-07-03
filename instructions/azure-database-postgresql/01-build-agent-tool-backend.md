@@ -30,7 +30,7 @@ lab:
 
 演習を最後まで行うには、次のものが必要です。
 
-- Azure サブスクリプション (必要な Azure サービスをデプロイするためのアクセス許可が付与されていること)。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
+- 必要な Azure サービスをデプロイする権限を持つ Azure サブスクリプション。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
 - [サポートされているプラットフォーム](https://code.visualstudio.com/docs/supporting/requirements#_platforms)のいずれかにインストールされた [Visual Studio Code](https://code.visualstudio.com/)。
 - 最新バージョンの [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)。
 - [Python 3.12](https://www.python.org/downloads/) 以上。
@@ -46,26 +46,26 @@ lab:
     https://github.com/MicrosoftLearning/mslearn-azure-ai/raw/main/downloads/python/postgresql-build-agent-python.zip
     ```
 
-1. このファイルを自分のシステム内の、このプロジェクトの作業に使用する場所にコピーするか移動します。 その後で、ファイルの圧縮を解除して任意のフォルダーに出力します。
+1. プロジェクトで作業するシステム内の場所にファイルをコピーまたは移動します。 その後、ファイルをフォルダーに解凍します。
 
-1. Visual Studio Code (VS Code) を起動し、メニューで **[ファイル] > [フォルダーを開く...]** を選択してから、プロジェクト ファイルが含まれているフォルダーを選択します。
+1. Visual Studio Code (VS Code) を起動し、メニューで **[ファイル] > [フォルダーを開く...]** を選択してから、プロジェクト ファイルを含むフォルダーを選びます。
 
-1. このプロジェクトのデプロイ スクリプトは、Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方があります。 自分の環境に適したファイルを開き、スクリプトの先頭の 2 つの値を自分のニーズに合わせて変更してから、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
+1. プロジェクトには Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方のデプロイ スクリプトが含まれています。 自分の環境に適したファイルを開き、スクリプトの先頭の 2 つの値を自分のニーズに合わせて変更してから、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
 
     ```
     "<your-resource-group-name>" # Resource Group name
     "<your-azure-region>" # Azure region for the resources
     ```
 
-1. メニュー バーで、**[ターミナル] > [新しいターミナル]** を選択して VS Code の中にターミナル ウィンドウを開きます。
+1. メニュー バーで、**[ターミナル] > [新しいターミナル]** を選択して、VS Code でターミナル ウィンドウを開きます。
 
-1. 次のコマンドを実行して Azure アカウントにログインします。 画面の指示に従って、演習用の Azure アカウントとサブスクリプションを選択します。
+1. 次のコマンドを実行して、Azure アカウントにログインします。 画面の指示に従って、演習用の Azure アカウントとサブスクリプションを選択します。
 
     ```
     az login
     ```
 
-1. 次のコマンドを実行して、演習に必要なリソース プロバイダーが自分のサブスクリプションに確実に存在する状態にします。
+1. 次のコマンドを実行して、演習に必要なリソース プロバイダーが自分のサブスクリプションにあることを確認します。
 
     ```azurecli
     az provider register --namespace Microsoft.DBforPostgreSQL
@@ -85,6 +85,12 @@ lab:
     **PowerShell**
     ```powershell
     ./azdeploy.ps1
+    ```
+
+    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
+
+    ```powershell
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     ```
 
 1. スクリプト メニューが表示されたら、「**1**」と入力して **[Create PostgreSQL server with Entra authentication]** オプションを起動します。 これで、Entra 認証のみが有効化された状態でサーバーが作成されます。 **注:** デプロイが完了するまで 5 分から 10 分ほどかかります。
@@ -184,7 +190,7 @@ lab:
 
 1. 少し時間をかけて、このアプリのコード全体をレビューします。
 
-次は、Azure リソースのデプロイの最後の部分です。
+次に、Azure リソースのデプロイを完了します。
 
 ## Azure リソースのデプロイを完了する
 
@@ -196,7 +202,7 @@ lab:
 
 1. 「**4**」を入力して **[Retrieve connection info and access token]** オプションを起動します。 これで、必要な環境変数が記録されたファイルが作成されます。
 
-1. 「**5**」を入力してデプロイ スクリプトを終了します。
+1. 「**5**」と入力して、デプロイ スクリプトを終了します。
 
 1. 次のコマンドを実行して、前のステップで作成したファイルからターミナル セッションに環境変数を読み込みます。
 
@@ -210,7 +216,7 @@ lab:
     . .\.env.ps1
     ```
 
-    >**注:** ターミナルを開いたままにしてください。 閉じて新しいターミナルを作成する場合は、このコマンドをもう一度実行して環境変数を再度作成することが必要になる可能性があります。
+    >**注:** ターミナルは開いたままにします。 閉じて新しいターミナルを作成する場合は、このコマンドをもう一度実行して環境変数を再度作成することが必要になる可能性があります。
 
     >**注:** アクセス トークンは約 1 時間後に失効します。 後で再接続が必要な場合は、このスクリプトをもう一度実行し、オプション **4** を選択して新しいトークンを生成してから、もう一度変数をエクスポートしてください。
 
@@ -327,7 +333,7 @@ lab:
     python -m venv .venv
     ```
 
-1. 次のコマンドを実行して Python 環境をアクティブにします。 **注:** Linux/macOS では Bash コマンドを使用します。 Windows では PowerShell コマンドを使用します。 Windows で Git Bash を使っている場合は、**source .venv/Scripts/activate** を使用します。
+1. 次のコマンドを実行して、Python 環境をアクティブにします。 **注:** Linux/macOS では、Bash コマンドを使用してください。 Windows では、PowerShell コマンドを使用します。 Windows で Git Bash を使っている場合は、**source .venv/Scripts/activate** を使用します。
 
     **Bash**
     ```bash
