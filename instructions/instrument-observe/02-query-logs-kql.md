@@ -71,10 +71,11 @@ Kusto 照会言語 (KQL) は、Application Insights のログ データを分析
     az provider register --namespace Microsoft.OperationalInsights
     ```
 
-1. 次のコマンドを実行して、Application Insights CLI 拡張機能を追加します。 この拡張機能は、デプロイ スクリプトで Application Insights リソースを作成して管理するために使用するコマンドを提供します。
+1. 次のコマンドを実行して、この演習で使用する Azure CLI 拡張機能を追加します。 **Application Insights** 拡張機能には、デプロイ スクリプトが Application Insights リソースの作成と管理に使用するコマンドが用意されています。 **スケジュール済みクエリ** 拡張機能には、後でログ検索アラート ルールを作成するために使用するコマンドが用意されています。
 
     ```
     az extension add --name application-insights
+    az extension add --name scheduled-query
     ```
 
 1. ターミナルで適切なコマンドを実行して、スクリプトを起動します。
