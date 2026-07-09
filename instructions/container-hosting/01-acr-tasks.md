@@ -303,14 +303,14 @@ lab:
     ```bash
     az acr repository show \
         --name $ACR_NAME \
-        --image inference-api:v1.0.0 \
+        --image inference-api:v1.0.0
     ```
 
     **PowerShell**
     ```powershell
     az acr repository show `
         --name $env:ACR_NAME `
-        --image inference-api:v1.0.0 `
+        --image inference-api:v1.0.0
     ```
 
     **[writeEnabled]** フィールドには **[False]** が表示され、イメージが保護されていることが示されています。
