@@ -17,7 +17,7 @@ lab:
 
 この演習では、MCP 拡張機能を使用して Azure Functions プロジェクトを作成し、ドキュメント処理用のツール トリガー関数を定義して、MCP サーバー設定を構成し、エージェント モードの GitHub Copilot から接続してサーバーをローカルでテストします。
 
->**注:** この演習では Azure Functions MCP 拡張機能を使用しますが、この拡張機能は現在も活発に進化しています。 最新のセットアップ手順、API サーフェス、構成オプションについては、[Azure Functions MCP 拡張機能のドキュメント](/azure/azure-functions/functions-bindings-mcp-trigger)を参照してください。
+>**注:** この演習では Azure Functions MCP 拡張機能を使用しますが、この拡張機能は現在も活発に進化しています。 最新のセットアップ手順、API サーフェス、構成オプションについては、[Azure Functions MCP 拡張機能のドキュメント](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-mcp)を参照してください。
 
 この演習で実行されるタスク:
 
@@ -250,7 +250,7 @@ lab:
 
 ## 次のステップ
 
-運用環境では、Flex 従量課金プランを使用して関数アプリを Azure にデプロイし、**mcp_extension** システム キーを使用して MCP クライアント接続を認証し、各ツール関数内のプレースホルダー ロジックを **DefaultAzureCredential** と関数アプリのマネージド ID を使用した Azure AI サービスへの呼び出しに置き換えます。 詳細については [Azure Functions MCP 拡張機能のドキュメント](/azure/azure-functions/functions-bindings-mcp-trigger)を参照してください。
+運用環境では、Flex 従量課金プランを使用して関数アプリを Azure にデプロイし、**mcp_extension** システム キーを使用して MCP クライアント接続を認証し、各ツール関数内のプレースホルダー ロジックを **DefaultAzureCredential** と関数アプリのマネージド ID を使用した Azure AI サービスへの呼び出しに置き換えます。 詳細については [Azure Functions MCP 拡張機能のドキュメント](/azure/azure-functions/functions-bindings-mcp)を参照してください。
 
 ## トラブルシューティング
 

@@ -1,6 +1,6 @@
 # Microsoft ラボの演習
 <!-- Change the title above as appropriate -->
-[演習用の GitHub ページ](https://microsoftlearning.github.io/mslearn-azure-developer/)
+[演習用の GitHub ページ](https://microsoftlearning.github.io/mslearn-azure-ai/)
 
 このリポジトリには、Microsoft スキルアップ コンテンツの演習とサポート ファイルが含まれています。
 
