@@ -13,30 +13,32 @@ lab:
 
 # Azure Managed Redis でセマンティック検索を実装する
 
-この演習では、Azure Managed Redis リソースを作成し、ベクトル ストレージ アプリケーションのコードを完成させます。 このアプリケーションは、埋め込みを含むサンプル製品データを読み込み、ベクトル埋め込みとメタデータを含めた新しい製品を保存し、ベクトル埋め込みを使用してセマンティック類似性検索を行い、コサイン類似度に基づいて関連製品を表示します。 ベクトルをメタデータを含むバイナリ データとして保存する、HNSW アルゴリズム構成を使用して RediSearch インデックスを作成する、KNN クエリを実行して意味的に似た製品を見つけるなど、主要なベクトル操作を実装します。
+この演習では、Azure Managed Redis をデプロイし、Python Flask の Web アプリを完成させて、製品の埋め込みやメタデータを保存し、ベクトル インデックスを作成し、コサイン距離を使用した類似性検索を実行します。 Microsoft Entra ID に接続し、インデックスを作成し、製品ベクトルを保存し、ブラウザーベースのインターフェイスから類似製品のクエリを実行するコードを追加します。
 
 この演習で実行されるタスク:
 
 - プロジェクトのスターター ファイルをダウンロードする
 - Azure Managed Redis リソースを作成する
-- コードを追加してビジネス ロジックを完成させる
-- アプリを実行してサンプル データを読み込み、埋め込み付きの製品を保存し、類似性検索を実行する
+- スターター ファイルにコードを追加してアプリを完成させる
+- 製品を読み込み、ベクトルを保存し、類似性検索を実行するアプリを実行する
 
 この演習の所要時間は約 **30** 分です。
 
 ## 開始する前に
 
+このセクションでは、演習に必要な前提条件をレビューします。
+
 演習を最後まで行うには、次のものが必要です。
 
-- エンタープライズ SKU で Azure Managed Redis インスタンスを作成する権限がある Azure サブスクリプション。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
+- Azure サブスクリプション。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
 - [サポートされているプラットフォーム](https://code.visualstudio.com/docs/supporting/requirements#_platforms)のいずれかにインストールされた [Visual Studio Code](https://code.visualstudio.com/)。
 - [Python 3.12](https://www.python.org/downloads/) 以上。
 - 最新バージョンの [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)。
-- Azure CLI **redisenterprise** 拡張機能。 **az extension add --name redisenterprise** コマンドを実行するとインストールできます。
+- Azure CLI **redisenterprise** 拡張機能、バージョン 2.75.0 以上。 後のステップでこの拡張機能のインストールやアップグレードが行われます。
 
 ## プロジェクト スターター ファイルをダウンロードして Azure Managed Redis をデプロイする
 
-このセクションでは、アプリのスターターファイルをダウンロードし、スクリプトを使って Azure Managed Redis のサブスクリプションへのデプロイを初期化します。 Azure Managed Redis のデプロイが完了するまでに 5 分から 10 分かかります。
+このセクションでは、アプリのスターターファイルをダウンロードし、スクリプトを使って Azure Managed Redis のサブスクリプションへのデプロイを初期化します。 Azure Managed Redis のデプロイは完了までに 5 から 10 分かかるため、まずデプロイを開始し、プロビジョニング中にアプリにコードを追加します。
 
 1. ブラウザーを開き、次の URL を入力してスターター ファイルをダウンロードします。 ファイルはユーザーの既定のダウンロード場所に保存されます。
 
@@ -48,7 +50,7 @@ lab:
 
 1. Visual Studio Code (VS Code) を起動し、メニューで **[ファイル] > [フォルダーを開く...]** を選択してから、プロジェクト ファイルを含むフォルダーを選びます。
 
-1. プロジェクトには Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方のデプロイ スクリプトが含まれています。 お使いの環境に適したファイルを開き、スクリプトの先頭にある 2 つの値をニーズに合わせて変更し、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
+1. プロジェクトには Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方のデプロイ スクリプトが含まれています。 自分の環境に適したファイルを開き、スクリプトの先頭の 2 つの値を自分のニーズに合わせて変更してから、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
 
     ```
     "<your-resource-group-name>" # Resource Group name
@@ -69,10 +71,10 @@ lab:
     az provider register --namespace Microsoft.Cache
     ```
 
-1. 次のコマンドを実行して、Azure CLI 用の **redisenterprise** 拡張機能をインストールします。
+1. 次のコマンドを実行して、Azure CLI 用の **redisenterprise** 拡張機能をインストールまたはアップグレードします。 データベースで Microsoft Entra ID アクセスを構成するには、バージョン 2.75.0 以上が必要です。
 
     ```
-    az extension add --name redisenterprise
+    az extension add --upgrade --name redisenterprise
     ```
 
 1. ターミナルで適切なコマンドを実行して、スクリプトを起動します。
@@ -95,20 +97,233 @@ lab:
 
 1. スクリプトの実行中に、「**1**」と入力して **1. Create Azure Managed Redis resource** オプションを起動します。
 
-    このオプションは、リソースグループがまだ存在していなければ作成して、Azure Managed Redis のデプロイを開始します。 このプロセスは Azure のバックグラウンドタスクとして完了します。
+    このオプションは、リソースグループがまだ存在していなければ作成して、Azure Managed Redis をデプロイします。 スクリプトは、5 から 10 分間かかるデプロイの完了を待機し、ターミナルにその結果を報告します。 スクリプトを実行したまま、次のセクションに進み、デプロイのプロビジョニング中にコードを追加します。 定期的に端末を確認してエラーをチェックします。
 
-1. コンソールに次のメッセージが表示されたら、**Enter** を選択してメニューに戻り、次に **[4]** を選択してスクリプトを終了します。 後でもう一度スクリプトを実行して、デプロイ状況を確認し、プロジェクト用の *.env* ファイルを作成します。
+    デプロイが成功すると、次のような確認メッセージが表示され、メニューが返されます。
 
-    Azure Managed Redis リソースが作成されており、完了までに 5 分から 10 分かかります。**
+    Azure Managed Redis リソースが正常に作成されました: amr-exercise-\<hash>**
 
-    演習の後半でメニューからデプロイ状況を確認できます。**
+    > **注:** デプロイが失敗した場合、多くの場合は選択したリージョンの SKU の容量が一時的に不足していることが原因です。 画面上の指示に従ってスクリプトを終了し、スクリプト上部近くの **location** 変数を eastus2、australiaeast、canadacentral など別の地域に変更し、もう一度スクリプトを実行してオプション 1 を選択します。 失敗したリソースは次の試行の前に自動的に削除されます。
 
+## アプリの仕上げ
+
+このセクションでは、ベクトルの保存と検索操作を完了するコードを *client/vector_functions.py* ファイルに追加します。 *client/app.py* の Flask アプリはこれらの関数を呼び出してブラウザーからワークフローを実行します。 *client/app.py* を編集する必要はありません。 このアプリは、演習の後半で実行します。
+
+1. *client/vector_functions.py* ファイルを開き、コードの追加を開始します。
+
+>**注:** アプリケーションに追加するコード ブロックは、コードのそのセクションのコメントと一致する必要があります。
+
+### Azure Managed Redis に接続するコードを追加する
+
+このセクションでは、Microsoft Entra ID で認証する Redis クライアントを作成するコードを追加します。 Entra ID を使うと、アプリではアクセス キーが処理されません。
+
+**get_client()** 関数は **REDIS_HOST** 環境変数から Redis エンドポイントを読み取り、**create_from_default_azure_credential()** を呼び出して資格情報プロバイダーを構築します。 プロバイダーは **DefaultAzureCredential** を使用して Microsoft Entra トークンを取得し、バックグラウンドで自動的に更新します。
+
+1. **# BEGIN CONNECTION CODE SECTION** というコメントを見つけ、コメントの下に次のコードを追加します。 コードの配置が適切かどうかを必ず確認してください。
+
+    ```python
+    def get_client() -> redis.Redis:
+        """Create a Redis client for Azure Managed Redis using Microsoft Entra ID."""
+        redis_host = os.environ.get("REDIS_HOST")
+
+        if not redis_host:
+            raise ValueError("REDIS_HOST environment variable must be set")
+
+        credential_provider = create_from_default_azure_credential(
+            ("https://redis.azure.com/.default",),
+        )
+
+        return redis.Redis(
+            host=redis_host,
+            port=10000,
+            ssl=True,
+            decode_responses=False,
+            credential_provider=credential_provider,
+            socket_timeout=30,
+            socket_connect_timeout=30,
+        )
+    ```
+
+1. 変更を保存し、少し時間を取ってコードをレビューします。
+
+### ベクトル インデックスを作成するコードを追加する
+
+このセクションでは、類似性検索で使用する RediSearch インデックスを作成するコードを追加します。
+
+**_create_vector_index()** 関数はテキスト フィールドと **embedding** というベクトル フィールドを定義します。 ベクトル フィールドは、HNSW アルゴリズムとコサイン距離および埋め込み次元 8 を使用してサンプル データをマッチングします。
+
+1. **# BEGIN CREATE VECTOR INDEX CODE SECTION** というコメントを見つけ、コメントの下に次のコードを追加します。 コードの配置が適切かどうかを必ず確認してください。
+
+    ```python
+    def _create_vector_index(self):
+        """Create a RediSearch index for product semantic search."""
+        try:
+            schema = (
+                TextField("name"),
+                TextField("category"),
+                TextField("product_id"),
+                VectorField(
+                    "embedding",
+                    "HNSW",
+                    {
+                        "TYPE": "FLOAT32",
+                        "DIM": VECTOR_DIM,
+                        "DISTANCE_METRIC": "COSINE",
+                    },
+                ),
+            )
+
+            definition = IndexDefinition(
+                prefix=["product:"],
+                index_type=IndexType.HASH,
+            )
+
+            self.r.ft(VECTOR_INDEX_NAME).create_index(
+                fields=schema,
+                definition=definition,
+            )
+        except redis.ResponseError as e:
+            if "already exists" not in str(e):
+                raise Exception(f"Error creating vector index: {e}")
+        except Exception as e:
+            raise Exception(f"Error creating vector index: {e}")
+    ```
+
+1. 変更を保存し、少し時間を取ってコードをレビューします。
+
+### 製品ベクトルを保存するコードを追加する
+
+このセクションでは、Redis で製品埋め込みとメタデータを保存するコードを追加します。
+
+**store_product()** 関数は埋め込みリストを numpy を使用して **float32** バイトに変換し、埋め込みとメタデータを **hset()** を使用して Redis のハッシュに書き込みます。
+
+1. **# BEGIN STORE PRODUCT CODE SECTION** というコメントを見つけ、コメントの下に次のコードを追加します。 コードの配置が適切かどうかを必ず確認してください。
+
+    ```python
+    def store_product(
+        self,
+        vector_key: str,
+        vector: list[float],
+        metadata: dict[str, str] | None = None,
+    ) -> tuple[bool, str]:
+        """Store or update a product hash containing embedding and metadata."""
+        try:
+            embedding = np.array(vector, dtype=np.float32)
+            data: dict[str, Any] = {"embedding": embedding.tobytes()}
+
+            if metadata:
+                for key, value in metadata.items():
+                    data[key] = str(value)
+
+            result = self.r.hset(vector_key, mapping=data)
+            if result > 0:
+                return True, f"Product stored successfully under key '{vector_key}'"
+            return True, f"Product updated successfully under key '{vector_key}'"
+        except Exception as e:
+            return False, f"Error storing product: {e}"
+    ```
+
+1. 変更を保存し、少し時間を取ってコードをレビューします。
+
+### 類似製品を検索するコードを追加する
+
+このセクションでは、ベクトル インデックスに対して KNN 類似性検索を実行するコードを追加します。
+
+**search_similar_products()** 関数はクエリ埋め込みをバイトに変換し、RediSearch の KNN クエリを構築し、スコア順に最も近い製品マッチを返します。
+
+1. **# BEGIN SEARCH SIMILAR PRODUCTS CODE SECTION** というコメントを見つけ、コメントの下に次のコードを追加します。 コードの配置が適切かどうかを必ず確認してください。
+
+    ```python
+    def search_similar_products(
+        self,
+        query_vector: list[float],
+        top_k: int = 3,
+    ) -> tuple[bool, list[dict[str, Any]] | str]:
+        """Run a KNN vector query against product embeddings."""
+        try:
+            query_bytes = np.array(query_vector, dtype=np.float32).tobytes()
+
+            knn_query = (
+                Query(f"*=>[KNN {top_k} @embedding $query_vec AS score]")
+                .return_fields("name", "category", "product_id", "score")
+                .sort_by("score")
+                .dialect(2)
+            )
+
+            results = self.r.ft(VECTOR_INDEX_NAME).search(
+                knn_query,
+                query_params={"query_vec": query_bytes},
+            )
+
+            if results.total == 0:
+                return False, "No products found in Redis. Load sample products first."
+
+            similarities: list[dict[str, Any]] = []
+            for doc in results.docs:
+                similarities.append(
+                    {
+                        "key": doc.id,
+                        "similarity": float(doc.score),
+                        "product_id": doc.product_id.decode() if isinstance(doc.product_id, bytes) else doc.product_id,
+                        "name": doc.name.decode() if isinstance(doc.name, bytes) else doc.name,
+                        "category": doc.category.decode() if isinstance(doc.category, bytes) else doc.category,
+                    }
+                )
+
+            return True, similarities
+        except Exception as e:
+            return False, f"Error searching products: {e}"
+    ```
+
+1. 変更を保存し、少し時間を取ってコードをレビューします。
+
+## リソースのデプロイを確認する
+
+このセクションでは、デプロイ スクリプトに戻って、ベクトル データベースを作成し、Microsoft Entra ID アクセスを構成し、Redis エンドポイントで環境変数ファイルを生成します。
+
+1. デプロイ スクリプトが実行中のターミナルに戻ります。 デプロイが成功すると、確認メッセージとメニューが表示されます。 スクリプトを終了した場合は、適切なコマンドを実行してもう一度起動します。
+
+    **Bash**
+    ```bash
+    bash azdeploy.sh
+    ```
+
+    **PowerShell**
+    ```powershell
+    ./azdeploy.ps1
+    ```
+
+1. **2. Create database and configure access** (データベースを作成してアクセスを構成する) オプションを実行するには、「**2**」を入力します。 これにより、RediSearch モジュールでベクトル対応データベースが作成され、アカウントにデータ アクセス ポリシーが割り当てられ、**REDIS_HOST** で環境変数ファイルが作成されます。
+
+1. (省略可能)「**3**」と入力して、**[3 デプロイの状態を確認する]** オプションを最後の確認として実行します。
+
+1. 「**4**」を入力して、デプロイ スクリプトを終了します。
+
+1. 適切なコマンドを実行して、前の手順で作成したファイルからターミナル セッションに環境変数を読み込みます。
+
+    **Bash**
+    ```bash
+    source .env
+    ```
+
+    **PowerShell**
+    ```powershell
+    . .\.env.ps1
+    ```
+
+    >**注:** ターミナルは、開いたままにします。 ターミナルを閉じて新しいターミナルを作成する場合は、このコマンドをもう一度実行して、環境変数をもう一度読み込む必要があります。
 
 ## Python 環境を構成する
 
-このセクションでは、Python 環境を作成し、依存関係をインストールします。
+このセクションでは、クライアント ディレクトリに移動し、Python 環境を作成し、依存関係をインストールします。
 
-1. VS Code ターミナルで次のコマンドを実行して、Python 環境を作成します。
+1. VS Code ターミナルで次のコマンドを実行して、*client* ディレクトリに移動します。
+
+    ```
+    cd client
+    ```
+
+1. 次のコマンドを実行して、Python 環境を作成します。
 
     ```
     python -m venv .venv
@@ -132,258 +347,37 @@ lab:
     pip install -r requirements.txt
     ```
 
-## 管理ベクトル アプリを完成させる
-
-このセクションでは、*manage_vector.py* スクリプトにコードを追加してアプリを完成させます。 Azure Managed Redis リソースが完全にデプロイされていることを確認し、*.env* ファイルを作成してから、演習の後半でアプリを起動します。
-
-1. *manage_vector.py* ファイルを開き、コードの追加を始めます。
-
->**注:** アプリケーションに追加するコード ブロックは、コードのそのセクションのコメントと一致する必要があります。
-
-### initialization and connection コードを追加する
-
-このセクションでは、redis-py を使って Azure Managed Redis への接続を確立するコードを追加します。 **_connect_to_redis()** 関数は redis-py **Redis** クラスを使って認証付きの安全な SSL 接続を作成します。 **__init__()** メソッドは、セマンティック検索操作用のベクトル インデックスを初期化します。
-
-1. **# BEGIN INITIALIZATION AND CONNECTION CODE SECTION** というコメントを見つけ、コメントの下に次のコードを追加します。 コードの配置が適切かどうかを必ず確認してください。
-
-    ```python
-    def __init__(self):
-        """Initialize the product manager and establish Redis connection"""
-        self.r = self._connect_to_redis()
-        self._create_vector_index()  # Create RediSearch index for product embeddings
-        self.VECTOR_DIM = 8  # Product embedding dimensionality (matches sample_data.json)
-
-    def _connect_to_redis(self) -> redis.Redis:
-        """Establish connection to Azure Managed Redis using SSL encryption and authentication"""
-        try:
-            # Get connection parameters from environment variables
-            redis_host = os.getenv("REDIS_HOST")
-            redis_key = os.getenv("REDIS_KEY")
-
-            # Create Redis connection with SSL and authentication
-            r = redis.Redis(
-                host=redis_host,
-                port=10000,  # Azure Managed Redis uses port 10000
-                ssl=True,  # Use SSL encryption
-                decode_responses=False,  # Keep binary for embeddings - only decode text when needed
-                password=redis_key,  # Authentication key
-                db=0,  # Connect to database 0 (the default database with RediSearch module)
-                socket_timeout=30,  # Connection timeout
-                socket_connect_timeout=30,  # Socket timeout
-            )
-
-            # Test connection
-            r.ping()  # Verify Redis connectivity
-            return r
-
-        except redis.ConnectionError as e:
-            raise Exception(f"Connection error: {e}")
-        except redis.AuthenticationError as e:
-            raise Exception(f"Authentication error: {e}")
-        except Exception as e:
-            raise Exception(f"Unexpected error: {e}")
-    ```
-
-1. 変更を保存。
-
-### create vector index コードを追加する
-
-このセクションでは、redis-py 検索モジュールを使ってベクトル類似性検索用の RediSearch インデックスを作成するコードを追加します。 **_create_vector_index()** 関数は、テキスト フィールドと、コサイン類似度を使用した HNSW (階層型ナビゲーション可能スモール ワールド) インデックス用に構成された VectorField を含むスキーマを定義し、効率的なセマンティック検索操作を可能にします。
-
-1. **# BEGIN CREATE VECTOR INDEX CODE SECTION** というコメントを見つけ、コメントの下に次のコードを追加します。 コードの配置が適切かどうかを必ず確認してください。
-
-    ```python
-    def _create_vector_index(self):
-        """Create a RediSearch index for product semantic search using HNSW algorithm"""
-        try:
-            # Define schema with embedding field for HNSW-based product similarity search
-            # DIM=8 matches our sample data dimensions (in production, this would match your embedding model's output)
-            schema = (
-                TextField("name"),
-                TextField("category"),
-                TextField("product_id"),
-                VectorField(
-                    "embedding",
-                    "HNSW",  # Hierarchical Navigable Small World - fast approximate search
-                    {
-                        "TYPE": "FLOAT32",           # Standard for embeddings
-                        "DIM": 8,                    # Must match embedding dimensions in sample_data.json
-                        "DISTANCE_METRIC": "COSINE"  # Cosine similarity for semantic search
-                    }
-                )
-            )
-
-            # Create index on hash keys starting with "product:"
-            definition = IndexDefinition(
-                prefix=["product:"],
-                index_type=IndexType.HASH
-            )
-            self.r.ft("idx:products").create_index(
-                fields=schema,
-                definition=definition
-            )
-        except redis.ResponseError as e:
-            if "already exists" in str(e):
-                pass  # Index already exists, which is fine
-            else:
-                raise Exception(f"Error creating vector index: {str(e)}")
-        except Exception as e:
-            raise Exception(f"Error creating vector index: {str(e)}")
-    ```
-
-1. 変更を保存。
-
-### store product コードを追加する
-
-このセクションでは、Redis を使ってベクトル埋め込みとメタデータとともに製品を保存するコードを追加します。 **store_product()** 関数は numpy を使って埋め込み配列をバイナリ float32 バイトに変換し、その後 redis-py **hset()** メソッドを使って、Redis のハッシュ構造にバイナリ埋め込みとメタデータ フィールドを保存します。 このアプローチは、ベクトル データの効率的な保存と取得を可能にします。
-
-1. **# BEGIN STORE PRODUCT CODE SECTION** というコメントを見つけ、コメントの下に次のコードを追加します。 コードの配置が適切かどうかを必ず確認してください。
-
-    ```python
-    def store_product(self, vector_key: str, vector: list, metadata: dict = None) -> tuple[bool, str]:
-        """Store a product with embedding in Redis using hash data structure with binary embedding storage"""
-        try:
-            # Convert embedding to binary bytes using numpy for efficient storage
-            # This follows redis-py best practices for storing embeddings
-            embedding = np.array(vector, dtype=np.float32)
-            data = {"embedding": embedding.tobytes()}  # Store embedding as binary bytes
-
-            # Add metadata fields to the hash
-            if metadata:
-                for key, value in metadata.items():
-                    data[key] = str(value)
-
-            # Store the hash in Redis using hset() method
-            result = self.r.hset(vector_key, mapping=data)
-
-            if result > 0:
-                return True, f"Product stored successfully under key '{vector_key}'"
-            else:
-                return True, f"Product updated successfully under key '{vector_key}'"
-
-        except Exception as e:
-            return False, f"Error storing product: {e}"
-    ```
-
-1. 変更を保存。
-
-### search similar products ベクトル コードを追加する
-
-このセクションでは、redis-py クライアントで RediSearch を使用してベクトル類似性検索を実行するコードを追加します。 **search_similar_products()** 関数は numpy を使用してクエリ ベクトルをバイナリ float32 バイトに変換した後、RediSearch インデックスに対して KNN (k-nearest ネイバー) クエリを実行して、埋め込みのコサイン類似性に基づいて最も類似した製品を検索します。
-
-1. **# BEGIN SEARCH SIMILAR PRODUCTS CODE SECTION** というコメントを見つけ、コメントの下に次のコードを追加します。 コードの配置が適切かどうかを必ず確認してください。
-
-    ```python
-    def search_similar_products(self, query_vector: list, top_k: int = 3) -> tuple[bool, list | str]:
-        """Search for products similar to the query vector using RediSearch KNN queries"""
-        try:
-            # Convert query vector to binary bytes for KNN search
-            query_bytes = np.array(query_vector, dtype=np.float32).tobytes()
-
-            # Build KNN query using RediSearch vector search syntax for semantic similarity
-            # *=>[KNN k @field_name $query_vec] finds k most similar products based on embedding distance
-            knn_query = (
-                Query(f"*=>[KNN {top_k} @embedding $query_vec AS score]")
-                .return_fields("name", "category", "product_id", "score")
-                .sort_by("score")
-                .dialect(2)  # Dialect 2 enables vector search syntax
-            )
-
-            # Execute KNN search with query vector as parameter
-            results = self.r.ft("idx:products").search(
-                knn_query,
-                query_params={"query_vec": query_bytes}
-            )
-
-            if results.total == 0:
-                return False, "No products found in Redis. Ensure products are loaded and RediSearch module is enabled."
-
-            # Format results
-            similarities = []
-            for doc in results.docs:
-                similarities.append({
-                    "key": doc.id,
-                    "similarity": float(doc.score),
-                    "product_id": doc.product_id.decode() if isinstance(doc.product_id, bytes) else doc.product_id,
-                    "name": doc.name.decode() if isinstance(doc.name, bytes) else doc.name,
-                    "category": doc.category.decode() if isinstance(doc.category, bytes) else doc.category
-                })
-
-            return True, similarities
-
-        except Exception as e:
-            return False, f"Error searching products: {e}"
-    ```
-
-1. 変更を保存。
-
-### コードの確認
-
-少し時間をかけて、*manage_vector.py* ファイルのすべてのコードを確認します。
-
-## リソースのデプロイを確認する
-
-このセクションでは、デプロイ スクリプトをもう一度実行して、Azure Managed Redis のデプロイが完了したかどうかを確認し、エンドポイントとアクセス キーの値を持つ *.env* ファイルを作成します。
-
-1. ターミナルで適切なコマンドを実行してデプロイ スクリプトを起動します。 前のターミナルを閉じた場合は、メニューの **[ターミナル] > [新しいターミナル]** を選択して新しいターミナルを開きます。
-
-    **Bash**
-    ```bash
-    bash azdeploy.sh
-    ```
-
-    **PowerShell**
-    ```powershell
-    ./azdeploy.ps1
-    ```
-
-    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
-
-    ```powershell
-    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-    ```
-
-1. デプロイ メニューが表示されたら、「**2**」と入力して、**2. Check deployment status** オプションを実行します。 状態に **Successful** と表示されている場合は、次の手順に進みます。 そうでない場合は、数分待ってから、オプションをもう一度試してみてください。
-
-1. デプロイの完了後、「**3**」と入力して **3. Create database and retrieve endpoint and access key** オプションを実行します。 これにより RediSearch モジュールでデータベースが作成され、アクセス キー認証が可能になり、エンド ポイントとアクセス キーが取得されます。 その後、それらの値を含めた *.env* ファイルが作成されます。
-
-1. *.env* ファイルを確認して値が存在していることを確認し、「**4**」と入力してデプロイ スクリプトを終了します。
-
 ## アプリを実行する
 
-このセクションでは、完成したアプリケーションを実行し、ベクトル データの読み込み、保存、検索を練習します。 このアプリは **tkinter** を使って GUI を作成するため、データの表示や管理がより簡単になります。
+このセクションでは、完成した Flask アプリケーションを実行し、単一の Web ページからベクトルの保存と類似性検索を実行します。
 
-1. ターミナルで次のコマンドを実行して、アプリを起動します。 コマンドを実行する前に、演習の前半のコマンドを参照して、必要に応じて環境をアクティブ化します。
+1. ターミナルで次のコマンドを実行して、アプリを起動します。 コマンドを実行する前に、演習の前半のコマンドを参照して、必要に応じて環境をアクティブ化し環境変数を読み込みます。 *client* ディレクトリから移動した場合は、まず **cd client** を実行します。
 
     ```
-    python vectorapp.py
+    python app.py
     ```
 
-    アプリケーションは、次の画像のようになります。
+1. ブラウザーを開き、`http://localhost:5000` に移動してアプリにアクセスします。
 
-    ![実行中のベクトル アプリのスクリーンショット。](./media/vector-app.png)
+### サンプル データを読み込み、類似性検索を実行する
 
-> **注:** このセクションのすべての手順はこのアプリで実行されます。
+このセクションでは、サンプルの製品埋め込みを読み込み、最初の類似性検索を実行します。
 
-### サンプル データを読み込み、類似性検索を行う
+1. **[データ操作]** で **[サンプル製品を読み込む]** を選択します。
 
-このセクションでは、サンプル ベクトル データを Redis に読み込み、類似性検索を行う練習をします。 既知のベクトルを取得し、それをクエリとして使ってデータベース内の意味的に関連した製品を探す練習をします。
+1. **[すべての製品のリスト]** を選択し、**[操作結果]** にプロダクト キーが表示されているかを確認します。
 
-1. **[Load Sample Products]** を選択します。 読み込み操作の状況は **[Operation Results]** に表示されます。
+1. **[類似性検索]** で「**product:001**」と入力し、**[top_k]** を **[5]** に設定したままにしてから **[類似検索]** を選択します。
 
-1. サンプル データを表示するには、**[すべての製品リスト]** を選択します。 サンプル データには、サンプルデータ内の製品についてのキー、名前、カテゴリ、埋め込みが表示されます。
+1. 返された製品とその距離スコアを **[操作結果]** で確認します。
 
-1. **[Find Similar Products]** を選択し、**[Product Key:]** 入力フィールドに「`product:001`」と入力し、**[Search]** を選択します。
+### 新しい製品を保存して再度検索する
 
-    類似する製品のリストが製品情報、類似度スコアとともに返されます。
+このセクションでは、新しい製品埋め込みを保存し、類似性検索を再度実行してニアレストネイバーがどのように変化するかを確認します。
 
-### 新しい製品を保存し、類似性検索を行う
+1. **[製品の保存]** に次の値を入力し、**[製品の保存]** を選択します。
 
-
-
-1. **[Store New Product]** を選択し、フォームに次の情報を入力し、その後 **[Store Product]** を選択します。 操作結果を確認します。
-
-    Product Key:
+    プロダクト キー:
 
     ```
     product:011
@@ -403,11 +397,17 @@ lab:
     category=Sports
     ```
 
-    > **注:** **[Store New Product]** フォームにそのレコードのプロダクト キーを入力し、他のフィールドを変更して、任意のデータ レコードを編集することもできます。
+1. **[類似性検索]** で「**product:009**」と入力し、**[類似検索]** を選択します。
 
-1. **[Find Similar Products]** を選択し、**[Product Key:]** 入力フィールドに「`product:009`」と入力し、**[Search]** を選択します。
+1. 結果をレビューし、製品の類似性の順序が新たに保存されたベクトルを反映しているかを確認してください。
 
-    出力を見直すと、Gym Bag が Premium Backpack に最も類似した製品になっていることに気づきます。
+### 製品を削除する
+
+このセクションでは、プロダクト キーを 1 つ削除して、削除動作を検証します。
+
+1. **[製品の削除]** で「**product:011**」と入力し、**[削除]** を選択します。
+
+1. **[すべての製品のリスト]** を選択し、**[product:011]** が製品リストに表示されなくなったことを確認します。
 
 ## リソースをクリーンアップする
 
@@ -428,18 +428,28 @@ lab:
 **Azure Managed Redis リソースのデプロイを確認する**
 - [Azure portal](https://portal.azure.com) に移動してリソース グループを見つけます。
 - Azure Managed Redis リソースの **[プロビジョニングの状態]** の表示が **[成功]** であることを確認します。
-- リソースの **[公衆ネットワーク アクセス]** が有効で **[アクセス キー認証]** が **[有効]** に設定されているか確認します。
+- デプロイ スクリプトの **[デプロイの状態を確認する]** オプションを実行し、クラスターとデータベースの準備ができていることを確認してから、アプリを実行します。
+
+**認証とアクセスをチェックする**
+- **az account show** を実行して、Azure CLI にログインしていることを確認します。
+- デプロイ スクリプトの **Create database and configure access** オプションが正常に完了し、アカウントにデータベースに対するデータ アクセス ポリシーが適用されていることを確認します。
+- アプリで認証エラーが報告された場合は、アクセス ポリシーの割り当てが有効になるまでに少し時間がかかる可能性があるため、しばらく待ってからもう一度試してみてください。
 
 **コードの完全性とインデントを確認する**
-- すべてのコード ブロックが正しいセクションと、適切な BEGIN/END コメントマーカーの間に追加されていることを確認します。
-- Python のインデントが一貫していること (タブではなくスペースを使用していること)、およびすべてのコードが関数内で正しく配置されていることを確認します。
+- すべてのコード ブロックが、*client/vector_functions.py* 内の正しいセクションの、適切な BEGIN/END コメント マーカーの間に追加されていることを確認します。
+- Python のインデントが一貫している (タブではなくスペースを使用している) ことを確認します。
 - 指定されたセクションの外部でコードが誤って削除または変更されていないことを確認します。
 
 **環境変数を確認する**
-- *.env* ファイルがプロジェクト フォルダーに存在し、有効な **REDIS_HOST** と **REDIS_KEY** の数値が含まれていることを確認します。
-- プロジェクトのルートに *.env* ファイルがある事を確認します。
+- *.env* ファイルがプロジェクトのルートに存在し、**REDIS_HOST** 値が含まれていることを確認します。
+- **source .env** (Bash) または **. .\.env.ps1** (PowerShell) を実行して環境変数をターミナル セッションに読み込んだことを確認します。
+- 変数が空の場合は、**source .env** (Bash) または **. .\.env.ps1** (PowerShell) をもう一度実行します。
 
 **Python 環境と依存関係を確認する**
 - アプリを実行する前に、仮想環境がアクティブになっていることを確認します。
-- **pip list** を実行して、*requirements.txt* のすべてのパッケージが正常にインストールされたことを確認します。
+- **pip list** を実行して、*client/requirements.txt* のすべてのパッケージが正常にインストールされたことを確認します。
 
+**検索結果や製品の不足はありません**
+- 類似性検索を実行する前に、サンプル製品を読み込んだことを確認します。
+- **[すべての製品のリスト]** を選択してクエリ プロダクト キーがあることを確認します。
+- インデックス構成とマッチングするための 8 つの数値が埋め込みに含まれていることを確認してください。
