@@ -39,7 +39,7 @@ lab:
 - [サポートされているプラットフォーム](https://code.visualstudio.com/docs/supporting/requirements#_platforms)のいずれかにインストールされた [Visual Studio Code](https://code.visualstudio.com/)。
 - 最新バージョンの [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)。
 - Kubernetes コマンドライン ツール [kubectl](https://kubernetes.io/docs/tasks/tools/)。
-- オプション: [Python 3.12](https://www.python.org/downloads/) 以上。
+- [Python 3.12](https://www.python.org/downloads/) 以上。
 
 ## プロジェクト スターター ファイルをダウンロードして Azure サービスをデプロイする
 
@@ -55,11 +55,11 @@ lab:
 
 1. Visual Studio Code (VS Code) を起動し、メニューで **[ファイル] > [フォルダーを開く...]** を選択してから、プロジェクト ファイルを含むフォルダーを選びます。
 
-1. プロジェクトには Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方のデプロイ スクリプトが含まれています。 自分の環境に適したファイルを開き、スクリプトの先頭の 2 つの値を自分のニーズに合わせて変更してから、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
+1. *azdeploy.py* デプロイ スクリプトを開き、スクリプトの上部にあるリソース グループと場所の値を必要に応じて変更し、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
 
-    ```
-    "<your-resource-group-name>" # Resource Group name
-    "<your-azure-region>" # Azure region for the resources
+    ```python
+    rg = "<your-resource-group-name>"  # Resource Group name
+    location = "<your-azure-region>"   # Azure region for the resources
     ```
 
 1. メニュー バーで、**[ターミナル] > [新しいターミナル]** を選択して、VS Code でターミナル ウィンドウを開きます。
@@ -80,23 +80,13 @@ lab:
     az provider register --namespace Microsoft.Storage
     ```
 
-1. プロジェクトのルート ディレクトリにいることを確認し、ターミナルで適切なコマンドを実行してデプロイ スクリプトを起動します。
+1. プロジェクトのルート ディレクトリにいることを確認し、次のコマンドを実行してデプロイ スクリプトを起動します。
 
-    **Bash**
-    ```bash
-    bash azdeploy.sh
+    ```
+    python azdeploy.py
     ```
 
-    **PowerShell**
-    ```powershell
-    ./azdeploy.ps1
-    ```
-
-    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
-
-    ```powershell
-    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-    ```
+    > **注:** システムの構成によっては、Python コマンドが **python** ではなく **python3** になることがあります。
 
 ### Azure にリソースをデプロイする
 
@@ -238,11 +228,19 @@ PersistentVolumeClaim (PVC) では、ポッドにマウントできるストレ�
     kubectl apply -f k8s/service.yaml
     ```
 
-1. Service を作成した後、デプロイが完了するまで数分かかる場合があります。 次のコマンドでは、サービスを監視し、ポッドが使用可能になったときにポッドの外部 IP アドレスを更新します。 外部 IP アドレスはメモしておいてください。この演習の後半で必要になります。 IP アドレスが表示された後、**ctrl + c** キーを押してコマンドを終了します。
+1. Service を作成した後、デプロイが完了するまで数分かかる場合があります。 次のコマンドでは、サービスを監視し、ポッドが使用可能になったときにポッドの外部 IP アドレスを更新します。 IP アドレスが表示された後、**ctrl + c** キーを押してコマンドを終了します。
 
     ```
     kubectl get svc aks-config-api-service -w
     ```
+
+1. プロジェクトのルートから次のコマンドを実行して、再度デプロイ スクリプトを起動します。
+
+    ```
+    python azdeploy.py
+    ```
+
+1. 「**5**」と入力して、**[デプロイの状態を確認する]** オプションを実行します。 スクリプトは LoadBalancer の IP を読み取り、**API_ENDPOINT** として *client/.env* に書き込みます。 状態の確認が完了したら、「**7**」と入力してデプロイ スクリプトを終了します。
 
 ## クライアント アプリの実行
 
@@ -278,13 +276,6 @@ PersistentVolumeClaim (PVC) では、ポッドにマウントできるストレ�
     pip install -r requirements.txt
     ```
 
-1. クライアント ディレクトリに *.env* ファイルを作成し、次のコードを追加します。 **\<API_IP_address>** は、演習で前にコピーした値に置き換えます。
-
-    ```
-    # API endpoint - update this with the external IP from the LoadBalancer service
-    # Get the IP with: kubectl get services
-    API_ENDPOINT=http://<API_IP_address>
-    ```
 ### アプリで操作を実行する
 
 Python 環境が構成され、依存関係がインストールされたので、クライアント アプリケーションを実行して、デプロイされた API をテストできるようになりました。 API ではすべての操作が永続ボリュームに記録され、クライアントはさまざまなエンドポイントと対話するためのメニュー駆動型インターフェイスを提供します。
@@ -371,7 +362,7 @@ Python 環境が構成され、依存関係がインストールされたので�
 
 **AKS クラスターの作成エラーを解決する**
 - クォータ検証は AKS リソースが作成される前に失敗することがあり、プロビジョニングでの失敗では、クラスターが **[失敗]** または **[キャンセル済み]** 状態のままになることがあります。
-- エラーで **[Standard_D2s_v5]** が利用できないか、リージョンの容量が不足していると報告された場合は、オプション **7** で終了し、デプロイ スクリプトの上部近くにある **[場所]** を変更し、オプション **[3 AKS クラスターの作成]** を再度実行します。
+- エラーで **Standard_D2s_v7** が利用不可である、または Azure リージョンが容量不足であると報告された場合は、オプション **7** で終了してください。 **AKS_VM_SIZE** をデプロイ スクリプトの上部近くに記載されている v5 または v6 のフォールバック サイズのいずれかに変更するか、**[場所]** の値を変更してからオプション **[3. AKS クラスターを作成する]** を再度実行します。
 - エラーでクォータ不足と報告された場合は、サブスクリプションに利用可能な [Dsv5-family] クォータがあるリージョンを選択するか、クォータの増量を申請してください。 リージョンの変更が有効なのは、他のリージョンに十分なクォータがある場合に限られます。
 - AKS クラスターは、リソース グループが既に別のリージョンに存在しても、スクリプトで構成された**場所**を使用します。
 - オプション **5** で **[失敗]** または **[キャンセル済み]** が報告された場合は、根本的な問題を修正し、オプション **[6 失敗した AKS デプロイの削除]** を実行してからオプション **3** を再試行してください。 AKS リソースが作成されていない場合、削除は不要です。
@@ -383,7 +374,8 @@ Python 環境が構成され、依存関係がインストールされたので�
 - ConfigMap または Secret ファイルを更新した後、ローリング再起動を実行して構成を再度読み込みます: **kubectl rollout restart deployment aks-config-api**。
 
 **クライアント構成を確認する**
-- *client* フォルダーに *.env* ファイルを作成し、**API_ENDPOINT** を LoadBalancer の外部 IP (例: **http://20.xxx.xxx.xxx**) に設定していることを確かめます。
+- *client/.env* が存在し、LoadBalancer の外部 IP (例:**http://20.xxx.xxx.xxx**) に設定された **API_ENDPOINT** を含んでいることを確認します。
+- ファイルが不足しているか、古い IP が表示されている場合は、デプロイ スクリプトを実行して、サービスに外部 IP が含まれるようになった後にオプション **[5. デプロイの状態を確認する]** を選択し、*client/.env* を書き換えます。
 - ターミナルから **curl http://\<external-ip>/healthz** を実行して、API エンドポイントに到達できることを確認します。
 
 **Python 環境と依存関係を確認する**

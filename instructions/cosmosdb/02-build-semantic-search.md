@@ -48,7 +48,7 @@ lab:
 
 1. Visual Studio Code (VS Code) を起動し、メニューで **[ファイル] > [フォルダーを開く...]** を選択してから、プロジェクト ファイルを含むフォルダーを選びます。
 
-1. プロジェクトには Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方のデプロイ スクリプトが含まれています。 自分の環境に適したファイルを開き、スクリプトの先頭の 2 つの値を自分のニーズに合わせて変更してから、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
+1. *azdeploy.py* デプロイ スクリプトを開き、スクリプト上部の 2 つの値を必要に応じて変更して、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
 
     ```
     "<your-resource-group-name>" # Resource Group name
@@ -73,22 +73,10 @@ lab:
 
 このセクションでは、デプロイ スクリプトを実行して、ベクトル検索機能を備えた Cosmos DB アカウントをデプロイします。
 
-1. プロジェクトのルート ディレクトリにいることを確認し、ターミナルで適切なコマンドを実行してデプロイ スクリプトを起動します。
+1. プロジェクトのルート ディレクトリにいることを確認し、ターミナルで次のコマンドを実行してデプロイ スクリプトを起動します。
 
-    **Bash**
-    ```bash
-    bash azdeploy.sh
     ```
-
-    **PowerShell**
-    ```powershell
-    ./azdeploy.ps1
-    ```
-
-    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
-
-    ```powershell
-    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    python azdeploy.py
     ```
 
 1. スクリプト メニューが表示されたら、「**1**」と入力して **[Create Cosmos DB account]** オプションを開始します。 これにより、**EnableNoSQLVectorSearch** 機能とデータベースを含む Cosmos DB for NoSQL アカウントが作成されます。 **注:** デプロイが完了するまで 5 分から 10 分ほどかかります。
@@ -104,6 +92,8 @@ lab:
 このセクションでは、ベクトル類似検索を実行する関数を追加して、*vector_functions.py* ファイルを完成させます。 これらの関数は、**VectorDistance** 関数を使って、クエリ ベクトルとチケット埋め込みの類似度を計算します。 サポート アプリケーションでは、新しい問題が報告されたときに、これらの関数を使って似たチケットを検索できます。
 
 1. VS Code で *client/vector_functions.py* ファイルを開きます。
+
+>**ヒント:** コードの適切なインデントを維持するには、左余白 (列 1) のコード揃えを貼り付け、貼り付けられた行をすべて選択して、**Tab** キーを押し、ブロックを**開始/終了**のマーカーに合わせます。 必要に応じて **Shift + Tab** キーを押してインデントを戻してください。
 
 1. **BEGIN STORE VECTOR DOCUMENT FUNCTION** というコメントを検索し、次に示すコードをこのコメントの直後に追加します。 この関数は、類似検索のためのベクトル埋め込みを含むサポート チケットを格納します。
 
@@ -273,40 +263,56 @@ lab:
 1. **BEGIN CREATE VECTOR CONTAINER FUNCTION** というコメントを検索して、コードを確認します。 次の 2 つの重要なポリシー構成に注目してください。
 
     ```python
-    # Define the vector embedding policy
-    # This tells Cosmos DB how to handle vector data at the /embedding path
-    vector_embedding_policy = {
-        "vectorEmbeddings": [
-            {
-                "path": "/embedding",
-                "dataType": "float32",
-                "distanceFunction": "cosine",
-                "dimensions": 256
-            }
-        ]
-    }
+    def create_vector_container():
+        """
+        Create a container with vector embedding and indexing policies.
+        """
+        database = get_database()
+        container_name = os.environ.get("COSMOS_CONTAINER", "vectors")
 
-    # Define the indexing policy with vector index
-    # - DiskANN provides efficient approximate nearest neighbor search
-    # - Exclude /embedding/* from standard indexing (vectors use their own index)
-    indexing_policy = {
-        "indexingMode": "consistent",
-        "automatic": True,
-        "includedPaths": [{"path": "/*"}],
-        "excludedPaths": [{"path": "/embedding/*"}],
-        "vectorIndexes": [
-            {"path": "/embedding", "type": "diskANN"}
-        ]
-    }
+        # Define the vector embedding policy
+        # This tells Cosmos DB how to handle vector data at the /embedding path
+        vector_embedding_policy = {
+            "vectorEmbeddings": [
+                {
+                    "path": "/embedding",
+                    "dataType": "float32",
+                    "distanceFunction": "cosine",
+                    "dimensions": 256
+                }
+            ]
+        }
 
-    # Create the container with vector policies
-    # partition_key determines how data is distributed across physical partitions
-    container = database.create_container_if_not_exists(
-        id=container_name,
-        partition_key=PartitionKey(path="/documentId"),
-        indexing_policy=indexing_policy,
-        vector_embedding_policy=vector_embedding_policy
-    )
+        # Define the indexing policy with vector index
+        # - DiskANN provides efficient approximate nearest neighbor search
+        # - Exclude /embedding/* from standard indexing (vectors use their own index)
+        indexing_policy = {
+            "indexingMode": "consistent",
+            "automatic": True,
+            "includedPaths": [
+                {"path": "/*"}
+            ],
+            "excludedPaths": [
+                {"path": "/embedding/*"}
+            ],
+            "vectorIndexes": [
+                {
+                    "path": "/embedding",
+                    "type": "diskANN"
+                }
+            ]
+        }
+
+        # Create the container with vector policies
+        # partition_key determines how data is distributed across physical partitions
+        container = database.create_container_if_not_exists(
+            id=container_name,
+            partition_key=PartitionKey(path="/documentId"),
+            indexing_policy=indexing_policy,
+            vector_embedding_policy=vector_embedding_policy
+        )
+
+        return container
     ```
 
 1. 少し時間をとって、重要な構成要素を理解してください。

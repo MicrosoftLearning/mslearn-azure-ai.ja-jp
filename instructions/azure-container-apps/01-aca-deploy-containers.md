@@ -50,7 +50,7 @@ lab:
 
 1. Visual Studio Code (VS Code) を起動し、メニューで **[ファイル] > [フォルダーを開く...]** を選択してから、プロジェクト ファイルを含むフォルダーを選びます。
 
-1. プロジェクトには Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方のデプロイ スクリプトが含まれています。 自分の環境に適したファイルを開き、スクリプトの先頭の 2 つの値を自分のニーズに合わせて変更してから、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
+1. *azdeploy.py* デプロイ スクリプトを開き、スクリプト上部の 2 つの値を必要に応じて変更して、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
 
     ```
     "<your-resource-group-name>" # Resource Group name
@@ -69,6 +69,7 @@ lab:
 
     ```azurecli
     az extension add --name containerapp
+    az extension add --name log-analytics
     ```
 
 1. 次のコマンドを実行して、演習に必要なリソース プロバイダーがご自分のサブスクリプションにあることを確認します。
@@ -83,22 +84,10 @@ lab:
 
 このセクションでは、必要なサービスを Azure サブスクリプションにデプロイするためのデプロイ スクリプトを実行します。
 
-1. プロジェクトのルート ディレクトリにいることを確認し、ターミナルで適切なコマンドを実行してデプロイ スクリプトを起動します。 デプロイ スクリプトによって ACR がデプロイされ、演習に必要な環境変数を含むファイルが作成されます。
+1. プロジェクトのルート ディレクトリにいることを確認し、ターミナルで次のコマンドを実行してデプロイ スクリプトを起動します。 デプロイ スクリプトによって ACR がデプロイされ、演習に必要な環境変数のファイルが作成されます。
 
-    **Bash**
-    ```bash
-    bash azdeploy.sh
     ```
-
-    **PowerShell**
-    ```powershell
-    ./azdeploy.ps1
-    ```
-
-    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
-
-    ```powershell
-    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    python azdeploy.py
     ```
 
 1. スクリプトの実行中に、「**1**」と入力して **Create Azure Container Registry and build container image** オプションを起動します。 このオプションは ACR サービスを作成し、ACR タスクを使ってイメージを構築し、レジストリにプッシュします。
@@ -187,8 +176,14 @@ lab:
 
 1. 次のコマンドを実行してリビジョンを一覧表示し、新しいリビジョンが作成されたことを確認します。
 
+    **Bash**
     ```azurecli
     az containerapp revision list -n $CONTAINER_APP_NAME -g $RESOURCE_GROUP -o table
+    ```
+
+    **PowerShell**
+    ```powershell
+    az containerapp revision list -n $env:CONTAINER_APP_NAME -g $env:RESOURCE_GROUP -o table
     ```
 
     リビジョン名は `--0000002` のようなサフィックスで終わり、これが 2 番目のリビジョンであることを示します。 Container Apps では環境変数やシークレットを変更するたびに新しいリビジョンが作成され、更新された設定でアプリが再起動されます。 以前の非アクティブなリビジョンは、時間が経つと削除されることがあります。
@@ -258,8 +253,14 @@ lab:
 
 1. 次のコマンドを実行して、スタートアップおよびランタイム シグナルのログを確認します。 このコマンドは最近のコンソール出力のみを表示します。 過去のログと詳細なトラブルシューティングについて、ログは Container Apps 環境に関連付けられた Log Analytics ワークスペースに保存されます。
 
+    **Bash**
     ```azurecli
     az containerapp logs show -n $CONTAINER_APP_NAME -g $RESOURCE_GROUP
+    ```
+
+    **Powershell**
+    ```powershell
+    az containerapp logs show -n $env:CONTAINER_APP_NAME -g $env:RESOURCE_GROUP
     ```
 
     ワーカーが生成されて、ポート 8000 でリッスンしていることを示す、**gunicorn** スタートアップ メッセージを探します。 また、curl コマンド (GET/health、POST/process など) からの HTTP リクエスト ログも確認できます。

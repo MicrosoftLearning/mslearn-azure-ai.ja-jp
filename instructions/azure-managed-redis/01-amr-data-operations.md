@@ -36,7 +36,7 @@ lab:
 
 ## プロジェクト スターター ファイルをダウンロードして Azure Managed Redis をデプロイする
 
-このセクションでは、コンソール アプリのスターター ファイルをダウンロードし、スクリプトを使って Azure Managed Redis のサブスクリプションへのデプロイを初期化します。 Azure Managed Redis のデプロイが完了するまでに 5 分から 10 分かかります。
+このセクションでは、コンソール アプリのスターター ファイルをダウンロードし、スクリプトを使って Azure Managed Redis をサブスクリプションにデプロイします。 デプロイは 5 から 10 分かかるため、これを最初に開始して、プロビジョニング中にアプリ コードを入力してください。
 
 1. ブラウザーを開き、次の URL を入力してスターター ファイルをダウンロードします。 ファイルはユーザーの既定のダウンロード場所に保存されます。
 
@@ -48,7 +48,7 @@ lab:
 
 1. Visual Studio Code (VS Code) を起動し、メニューで **[ファイル] > [フォルダーを開く...]** を選択してから、プロジェクト ファイルを含むフォルダーを選びます。
 
-1. プロジェクトには Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方のデプロイ スクリプトが含まれています。 自分の環境に適したファイルを開き、スクリプトの先頭の 2 つの値を自分のニーズに合わせて変更してから、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
+1. *azdeploy.py* デプロイ スクリプトを開き、スクリプト上部の 2 つの値を必要に応じて変更して、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
 
     ```
     "<your-resource-group-name>" # Resource Group name
@@ -75,62 +75,18 @@ lab:
     az extension add --name redisenterprise
     ```
 
-1. ターミナルで適切なコマンドを実行して、スクリプトを起動します。
+1. ターミナルで次のコマンドを実行して、デプロイ スクリプトを起動します。
 
-    **Bash**
-    ```bash
-    bash azdeploy.sh
     ```
-
-    **PowerShell**
-    ```powershell
-    ./azdeploy.ps1
-    ```
-
-    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
-
-    ```powershell
-    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    python azdeploy.py
     ```
 
 1. スクリプトの実行中に、「**1**」と入力して **1. Create Azure Managed Redis resource** オプションを起動します。
 
-    このオプションは、リソースグループがまだ存在していなければ作成して、Azure Managed Redis のデプロイを開始します。 このプロセスは Azure のバックグラウンドタスクとして完了します。
+    このオプションは、リソースグループがまだ存在していなければ作成して、Azure Managed Redis をデプロイします。 スクリプトは、デプロイが完了するまで待機し、ターミナルにその結果を報告します。
 
-1. コンソールに次のメッセージが表示されたら、**Enter** を選択してメニューに戻り、次に **[4]** を選択してスクリプトを終了します。 後でもう一度スクリプトを実行して、デプロイ状況を確認し、プロジェクト用の *.env* ファイルを作成します。
+1. デプロイ スクリプトは実行したまま、次のセクションに進み、Azure Managed Redis のプロビジョニング中にアプリ コードを入力してください。 完了またはエラーのメッセージがないか、ターミナルを定期的に確認してください。
 
-    Azure Managed Redis リソースが作成されており、完了までに 5 分から 10 分かかります。**
-
-    演習の後半でメニューからデプロイ状況を確認できます。**
-
-
-## Python 環境を構成する
-
-このセクションでは、Python 環境を作成し、依存関係をインストールします。
-
-1. VS Code ターミナルで次のコマンドを実行して、Python 環境を作成します。
-
-    ```
-    python -m venv .venv
-    ```
-
-1. 次のコマンドを使用して、Python 環境をアクティブ化します。 **注:** Linux/macOS では、Bash コマンドを使用してください。 Windows では、PowerShell コマンドを使用します。 Windows で Git Bash を使っている場合は、**source .venv/Scripts/activate** を使用します。
-
-    **Bash**
-    ```bash
-    source .venv/bin/activate
-    ```
-
-    **PowerShell**
-    ```powershell
-    .\.venv\Scripts\Activate.ps1
-    ```
-
-1. VS Code ターミナルで次のコマンドを実行して、依存関係をインストールします。
-
-    ```
-    pip install -r requirements.txt
-    ```
 
 ## アプリの仕上げ
 
@@ -142,23 +98,29 @@ lab:
 
 ### client connection を追加する
 
-このセクションでは、redis-py ライブラリを使って Azure Managed Redis への接続を確立するコードを追加します。 このコードは環境変数から接続認証情報を取得し、安全な SSL 通信のために構成された Redis クライアント インスタンスを作成します。
+このセクションでは、redis-py ライブラリを使って Azure Managed Redis への接続を確立するコードを追加します。 コードは環境変数から Redis エンドポイントを読み取り、**redis-entraid** 資格情報プロバイダーを通じて **DefaultAzureCredential** を使用するため、クライアントは Microsoft Entra ID を使用して認証し、そのトークンを自動的に更新します。
+
+>**ヒント:** コードの適切なインデントを維持するには、左余白 (列 1) のコード揃えを貼り付け、貼り付けられた行をすべて選択して、**Tab** キーを押し、ブロックを**開始/終了**のマーカーに合わせます。 必要に応じて **Shift + Tab** キーを押してインデントを戻してください。
 
 1. **# BEGIN CONNECTION CODE SECTION** というコメントを見つけ、コメントの下に次のコードを追加します。 コードの配置が適切かどうかを必ず確認してください。
 
     ```python
     try:
-        # Azure Managed Redis with Non-Clustered policy uses standard Redis connection
+        # Azure Managed Redis using Microsoft Entra ID authentication
         redis_host = os.getenv("REDIS_HOST")
-        redis_key = os.getenv("REDIS_KEY")
 
-        # Non-clustered policy uses standard Redis client connection
+        # create_from_default_azure_credential uses DefaultAzureCredential to
+        # acquire and refresh a Microsoft Entra token for Redis.
+        credential_provider = create_from_default_azure_credential(
+            ("https://redis.azure.com/.default",),
+        )
+
         r = redis.Redis(
             host=redis_host,
             port=10000,  # Azure Managed Redis uses port 10000
             ssl=True,
             decode_responses=True, # Decode responses to strings
-            password=redis_key,
+            credential_provider=credential_provider,
             socket_timeout=30,  # Add timeout for better reliability
             socket_connect_timeout=30,
         )
@@ -176,7 +138,7 @@ lab:
 
     ```python
     def store_hash_data(r, key, value) -> None:
-        """Store hash data in Redis"""
+        """Store a hash data in Redis"""
         clear_screen()
         print(f"Storing hash data for key: {key}")
         result = r.hset(key, mapping=value) # Store hash data
@@ -223,7 +185,7 @@ lab:
         input("\nPress Enter to continue...")
 
     def retrieve_expiration(r, key) -> None:
-        """Retrieve the TTL of a key"""
+        """Retrieve TTL of a key"""
         clear_screen()
         print(f"Retrieving the current TTL of {key}...")
         ttl = r.ttl(key) # Get current TTL
@@ -259,35 +221,61 @@ lab:
 
 ## リソースのデプロイを確認する
 
-このセクションでは、デプロイ スクリプトをもう一度実行して、Azure Managed Redis のデプロイが完了したかどうかを確認し、エンドポイントとアクセス キーの値を持つ *.env* ファイルを作成します。
+このセクションでは、Azure Managed Redis デプロイを検証し、データベースを作成し、Microsoft Entra ID アクセスを構成し、Redis エンドポイントで環境変数ファイルを作成します。
 
-1. ターミナルで適切なコマンドを実行してデプロイ スクリプトを起動します。 前のターミナルを閉じた場合は、メニューの **[ターミナル] > [新しいターミナル]** を選択して新しいターミナルを開きます。
+1. デプロイ スクリプトを実行しているターミナルに戻ります。 スクリプトで Azure Managed Redis リソースが正常に作成されたと報告されたら、**Enter** キーを選択してデプロイ メニューに戻ります。
+
+1. デプロイ メニューが表示されたら、「**2**」と入力して、**2. Check deployment status** オプションを実行します。 状態に **Succeeded** と表示されている場合は、次の手順に進みます。 そうでない場合は、数分待ってから、オプションをもう一度試してみてください。
+
+1. 「**3**」を入力して、**[3. データベースを作成してアクセスを構成する]** オプションを実行します。 これにより、データベースが作成され、アカウントに Microsoft Entra ID データ アクセス ポリシーが割り当てられることで自分の ID を使用してアプリを接続できるようになり、**REDIS_HOST** エンドポイントで *.env* および *.env.ps1* ファイルが作成されます。
+
+1. シェルの環境変数ファイルを確認して値が存在していることを確認し、「**4**」と入力してデプロイ スクリプトを終了します。
+
+## Python 環境を構成する
+
+このセクションでは、Azure デプロイが完了した後、Python 環境を作成し、依存関係をインストールします。
+
+1. VS Code ターミナルで次のコマンドを実行して、Python 環境を作成します。
+
+    ```
+    python -m venv .venv
+    ```
+
+1. 次のコマンドを使用して、Python 環境をアクティブ化します。 **注:** Linux/macOS では、Bash コマンドを使用してください。 Windows では、PowerShell コマンドを使用します。 Windows で Git Bash を使っている場合は、**source .venv/Scripts/activate** を使用します。
 
     **Bash**
     ```bash
-    bash azdeploy.sh
+    source .venv/bin/activate
     ```
 
     **PowerShell**
     ```powershell
-    ./azdeploy.ps1
+    .\.venv\Scripts\Activate.ps1
     ```
 
-    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
+1. VS Code ターミナルで次のコマンドを実行して、依存関係をインストールします。
 
-    ```powershell
-    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     ```
-
-1. デプロイ メニューが表示されたら、「**2**」と入力して、**2. Check deployment status** オプションを実行します。 状態に **Succeeded** と表示されている場合は、次の手順に進みます。 そうでない場合は、数分待ってから、オプションをもう一度試してみてください。
-
-1. デプロイの完了後、「**3**」と入力して **3. Create database and retrieve endpoint and access key** オプションを実行します。 これによりデータベースが作成され、アクセス キー認証が可能になり、エンド ポイントとアクセス キーが取得されます。 その後、それらの値を含めた *.env* ファイルが作成されます。
-
-1. *.env* ファイルを確認して値が存在していることを確認し、「**4**」と入力してデプロイ スクリプトを終了します。
+    pip install -r requirements.txt
+    ```
 
 ## コンソール アプリの実行
 
 このセクションでは、完成したコンソールアプリケーションを実行して Redis のさまざまなデータ操作を行います。 このアプリには、メニュー駆動のインターフェイスが用意されており、ハッシュデータの保存、値の取得、キーの有効期限管理、キーの削除を行うことができます。
+
+1. 適切なコマンドを実行して、デプロイ スクリプトによって作成されたファイルからターミナル セッションに環境変数を読み込みます。
+
+    **Bash**
+    ```bash
+    source .env
+    ```
+
+    **PowerShell**
+    ```powershell
+    . .\.env.ps1
+    ```
+
+    >**注:** ターミナルは、開いたままにします。 ターミナルを閉じて新しいターミナルを作成する場合は、このコマンドをもう一度実行して、環境変数をもう一度読み込む必要があります。
 
 1. ターミナルで次のコマンドを実行して、コンソール アプリを起動します。 コマンドを実行する前に、演習の前半のコマンドを参照して、必要に応じて環境をアクティブ化します。
 
@@ -331,7 +319,7 @@ lab:
 **Azure Managed Redis リソースのデプロイを確認する**
 - [Azure portal](https://portal.azure.com) に移動してリソース グループを見つけます。
 - Azure Managed Redis リソースの **[プロビジョニングの状態]** の表示が **[成功]** であることを確認します。
-- リソースの **[公衆ネットワーク アクセス]** が有効で **[アクセス キー認証]** が **[有効]** に設定されているか確認します。
+- リソースで **[公衆ネットワーク アクセス]** が有効にされていることを確認します。
 
 **コードの完全性とインデントを確認する**
 - すべてのコード ブロックが、*main.py* 内の適切な BEGIN/END コメント マーカーの間にある正しいセクションに追加されていることを確認します。
@@ -339,8 +327,13 @@ lab:
 - 指定されたセクションの外部でコードが誤って削除または変更されていないことを確認します。
 
 **環境変数を確認する**
-- *.env* ファイルがプロジェクト フォルダーに存在し、有効な **REDIS_HOST** と **REDIS_KEY** の数値が含まれていることを確認します。
-- *.env*ファイルが*main.py*と同じディレクトリにあることを確認します。
+- *.env* と *.env.ps1* の両方のファイルがプロジェクト フォルダーに存在し、有効な **REDIS_HOST** の値を含んでいることを確認します。
+- 両方のファイルが *main.py* と同じディレクトリにあることを確認します。
+
+**認証とアクセスをチェックする**
+- **az account show** を実行して、Azure CLI にログインしていることを確認します。
+- デプロイ スクリプトの **Create database and configure access** オプションが正常に完了し、アカウントにデータベースに対するデータ アクセス ポリシーが適用されていることを確認します。
+- アプリで認証エラーが報告された場合は、アクセス ポリシーの割り当てが有効になるまでに少し時間がかかる可能性があるため、しばらく待ってからもう一度試してみてください。
 
 **Python 環境と依存関係を確認する**
 - アプリを実行する前に、仮想環境がアクティブになっていることを確認します。

@@ -49,7 +49,7 @@ Kusto 照会言語 (KQL) は、Application Insights のログ データを分析
 
 1. Visual Studio Code (VS Code) を起動し、メニューで **[ファイル] > [フォルダーを開く...]** を選択してから、プロジェクト ファイルを含むフォルダーを選びます。
 
-1. プロジェクトには Bash (*azdeploy.sh*) と PowerShell (*azdeploy.ps1*) の両方のデプロイ スクリプトが含まれています。 自分の環境に適したファイルを開き、スクリプトの先頭の 2 つの値を自分のニーズに合わせて変更してから、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
+1. *azdeploy.py* デプロイ スクリプトを開き、スクリプト上部の 2 つの値を必要に応じて変更して、変更を保存します。 **注:** スクリプトの他の部分は変更しないでください。
 
     ```
     "<your-resource-group-name>" # Resource Group name
@@ -78,22 +78,10 @@ Kusto 照会言語 (KQL) は、Application Insights のログ データを分析
     az extension add --name scheduled-query
     ```
 
-1. ターミナルで適切なコマンドを実行して、スクリプトを起動します。
+1. ターミナルで次のコマンドを実行して、デプロイ スクリプトを起動します。
 
-    **Bash**
-    ```bash
-    bash azdeploy.sh
     ```
-
-    **PowerShell**
-    ```powershell
-    ./azdeploy.ps1
-    ```
-
-    > **注:** PowerShell がデジタル署名されていないためにスクリプトをブロックした場合は、同じターミナル セッション内で次のコマンドを実行し、再度配置スクリプトを実行してください。 このコマンドは、現在の PowerShell プロセスの実行ポリシーのみを変更します。
-
-    ```powershell
-    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    python azdeploy.py
     ```
 
 1. スクリプトの実行中、「**1**」と入力して、**[1. Application Insights を作成する]** オプションを起動します。
@@ -360,13 +348,14 @@ Kusto 照会言語 (KQL) は、Application Insights のログ データを分析
 
 **接続文字列を確認します**
 - デプロイ スクリプトの **[デプロイ状態の確認]** オプションを実行して、リソースが正常に作成されたことを確認します。
-- *.env* ファイルに **APPLICATIONINSIGHTS_CONNECTION_STRING** の値が含まれていることを確認します。
+**接続文字列を確認します**
+- デプロイ スクリプトの **[デプロイ状態の確認]** オプションを実行して、リソースが正常に作成されたことを確認します。
+- *.env* と *.env.ps1* の両方のファイルに **APPLICATIONINSIGHTS_CONNECTION_STRING** の値が含まれていることを確認します。
 - 接続文字列がない場合は、**[接続情報の取得]** オプションをもう一度実行します。
 
 **環境変数を検証する**
-- *.env* ファイルがプロジェクトのルートに存在し、**APPLICATIONINSIGHTS_CONNECTION_STRING**、**RESOURCE_GROUP**、**APPINSIGHTS_NAME**、**APPINSIGHTS_RESOURCE_ID**、**ALERT_EMAIL** の値が含まれていることを確認します。
-- **source .env** (Bash) または **. .\.env.ps1** (PowerShell) を実行して環境変数をターミナル セッションに読み込んだことを確認します。
-- 変数が空の場合は、**source .env** (Bash) または **. .\.env.ps1** (PowerShell) をもう一度実行します。
+- *.env* と *.env.ps1* の両方のファイルがプロジェクトのルートに存在し、**APPLICATIONINSIGHTS_CONNECTION_STRING**、**RESOURCE_GROUP**、**APPINSIGHTS_NAME**、**APPINSIGHTS_RESOURCE_ID**、および **ALERT_EMAIL** の値を含んでいることを確認します。
+- **source .env** (Bash) または **. .\.env.ps1** (PowerShell) を実行して環境変数をターミナル セッションに読み込みます。
 
 **認証を確認する**
 - **az account show** を実行して、Azure CLI にログインしていることを確認します。
