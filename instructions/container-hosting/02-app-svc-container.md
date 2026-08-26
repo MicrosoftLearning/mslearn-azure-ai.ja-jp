@@ -36,7 +36,7 @@ lab:
 - 必要な Azure サービスをデプロイする権限を持つ Azure サブスクリプション。 まだお持ちでない場合は、[サインアップ](https://azure.microsoft.com/)できます。
 - [サポートされているプラットフォーム](https://code.visualstudio.com/docs/supporting/requirements#_platforms)のいずれかにインストールされた [Visual Studio Code](https://code.visualstudio.com/)。
 - 最新バージョンの [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)。
-- オプション: [Python 3.12](https://www.python.org/downloads/) 以上。
+- [Python 3.12](https://www.python.org/downloads/) 以上。
 
 
 ## プロジェクト スターター ファイルをダウンロードして Azure サービスをデプロイする
